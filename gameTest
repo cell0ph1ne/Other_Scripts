@@ -78,7 +78,7 @@ end)
 
 task.spawn(function()
     while true do
-        for i = 100, 1500 do
+        for i = 1, 1500 do
             game:GetService("ReplicatedStorage").Shared.Universe.Network.RemoteEvent.Actionable:FireServer(i)
             task.wait()
         end
