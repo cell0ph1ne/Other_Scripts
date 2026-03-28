@@ -96,7 +96,7 @@ gui.Parent = player:WaitForChild("PlayerGui")
 local darkenFrame = Instance.new("Frame")
 darkenFrame.Size = UDim2.new(1, 0, 1, 0)
 darkenFrame.BackgroundColor3 = Color3.new(0, 0, 0)
-darkenFrame.BackgroundTransparency = 0.6
+darkenFrame.BackgroundTransparency = 0.75
 darkenFrame.BorderSizePixel = 0
 darkenFrame.Parent = gui
 
@@ -105,62 +105,85 @@ blur.Name = "AutoBoundsBlur"
 blur.Size = 12
 blur.Parent = game.Lighting
 
-local outlineRect = Instance.new("Frame")
-outlineRect.Size = UDim2.new(0, 400, 0, 500)
-outlineRect.Position = UDim2.new(0.5, -200, 0.5, -250)
-outlineRect.BackgroundTransparency = 1
-outlineRect.BorderSizePixel = 2
-outlineRect.BorderColor3 = Color3.new(1, 1, 0)
-outlineRect.Parent = gui
+local mainFrame = Instance.new("Frame")
+mainFrame.Size = UDim2.new(0, 280, 0, 170)
+mainFrame.Position = UDim2.new(0.5, -140, 0.5, -80)
+mainFrame.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+mainFrame.BackgroundTransparency = 0
+mainFrame.BorderSizePixel = 2
+mainFrame.BorderColor3 = Color3.new(1, 1, 0)
+mainFrame.ClipsDescendants = true
+mainFrame.Parent = gui
 
-local innerRect = Instance.new("Frame")
-innerRect.Size = UDim2.new(1, -4, 1, -4)
-innerRect.Position = UDim2.new(0, 2, 0, 2)
-innerRect.BackgroundColor3 = Color3.new(0, 0, 0)
-innerRect.BackgroundTransparency = 0
-innerRect.BorderSizePixel = 0
-innerRect.Parent = outlineRect
+local corner = Instance.new("UICorner")
+corner.CornerRadius = UDim.new(0, 12)
+corner.Parent = mainFrame
 
 local title = Instance.new("TextLabel")
-title.Size = UDim2.new(1, 0, 0, 50)
-title.Position = UDim2.new(0, 0, 0, 20)
+title.Size = UDim2.new(0, 280, 0, 30)
+title.Position = UDim2.new(0.5, -140, 0, 20)
 title.BackgroundTransparency = 1
 title.Text = "W31rd_Hub - Auto Bounds"
 title.TextColor3 = Color3.new(1, 1, 0)
-title.TextScaled = true
+title.TextSize = 18
 title.Font = Enum.Font.GothamBold
-title.Parent = innerRect
+title.Parent = mainFrame
 
 local bondLabel = Instance.new("TextLabel")
-bondLabel.Size = UDim2.new(1, 0, 0, 50)
-bondLabel.Position = UDim2.new(0, 0, 0.3, 0)
+bondLabel.Size = UDim2.new(0, 200, 0, 20)
+bondLabel.Position = UDim2.new(0, 10, 0, 60)
 bondLabel.BackgroundTransparency = 1
 bondLabel.Text = "Total Bounds: 0"
 bondLabel.TextColor3 = Color3.new(1, 1, 1)
-bondLabel.TextScaled = true
+bondLabel.TextSize = 18
 bondLabel.Font = Enum.Font.GothamBold
-bondLabel.Parent = innerRect
+bondLabel.TextXAlignment = Enum.TextXAlignment.Left
+bondLabel.Parent = mainFrame
 
 local execLabel = Instance.new("TextLabel")
-execLabel.Size = UDim2.new(1, 0, 0, 40)
-execLabel.Position = UDim2.new(0, 0, 0.8, 0)
+execLabel.Size = UDim2.new(0, 200, 0, 20)
+execLabel.Position = UDim2.new(0, 10, 0, 90)
 execLabel.BackgroundTransparency = 1
 execLabel.Text = "Total executions: 0"
 execLabel.TextColor3 = Color3.new(0, 1, 0)
-execLabel.TextScaled = true
+execLabel.TextSize = 18
 execLabel.Font = Enum.Font.GothamBold
-execLabel.Parent = innerRect
+execLabel.TextXAlignment = Enum.TextXAlignment.Left
+execLabel.Parent = mainFrame
+
+local button = Instance.new("TextButton")
+button.Size = UDim2.new(0, 180, 0, 30)
+button.Position = UDim2.new(0.5, -90, 0.78, 0)
+button.BackgroundColor3 = Color3.fromRGB(0, 102, 204)
+button.BackgroundTransparency = 0
+button.BorderSizePixel = 0
+button.Text = "Copy Discord Link"
+button.TextColor3 = Color3.new(1, 1, 1)
+button.TextScaled = true
+button.Font = Enum.Font.GothamBold
+button.Parent = mainFrame
+
+local buttonCorner = Instance.new("UICorner")
+buttonCorner.CornerRadius = UDim.new(0, 6)
+buttonCorner.Parent = button
+
+button.MouseButton1Click:Connect(function()
+    pcall(function()
+        setclipboard("https://discord.gg/bQnXyAYTzF")
+    end)
+end)
 
 local function getBondCount()
-    local bondInfo = player:FindFirstChild("PlayerGui") and player.PlayerGui:FindFirstChild("BondGui")
-    if bondInfo then
-        local bondCount = bondInfo:FindFirstChild("BondInfo")
-        if bondCount then
-            local content = bondCount:FindFirstChild("BondCount")
-            if content then
-                local text = content:FindFirstChild("ContentText")
-                if text then
-                    return tonumber(text.Text) or 0
+    local bondGui = player.PlayerGui:FindFirstChild("BondGui")
+    if bondGui then
+        local bondInfo = bondGui:FindFirstChild("BondInfo")
+        if bondInfo then
+            local bondCount = bondInfo:FindFirstChild("BondCount")
+            if bondCount then
+                if bondCount:IsA("TextLabel") then
+                    local text = bondCount.Text
+                    local num = tonumber(text:match("%d+"))
+                    return num or 0
                 end
             end
         end
@@ -187,60 +210,6 @@ task.spawn(function()
         local bonds = getBondCount()
         bondLabel.Text = "Total Bounds: " .. bonds
         task.wait(0.5)
-    end
-end)
-
-task.delay(40, function()
-    queue_on_teleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/zerquesth/Other_Scripts/refs/heads/main/lobbyTest'))()")
-    game.Players.LocalPlayer.Character:BreakJoints()
-end)            lastDirection = currentRail.CFrame.LookVector.Unit
-        end
-
-        local targetPos = currentPos - lastDirection * 20
-        local distance = (targetPos - currentPos).Magnitude
-        local duration = distance / velo
-        local start = tick()
-
-        while tick() - start < duration do
-            local pos = currentPos:Lerp(targetPos, (tick() - start) / duration)
-
-            root.CFrame = CFrame.new(pos)
-
-            workspace.CurrentCamera.CFrame = CFrame.new(
-                pos + Vector3.new(0, 15, 0),
-                pos
-            )
-
-            game:GetService("RunService").RenderStepped:Wait()
-        end
-
-        currentPos = targetPos
-
-        local nextRail = nil
-        local bDot = .5
-
-        for _, rail in ipairs(tRails) do
-            if not tVisited[rail] then
-                local toRail = (rail.Position - currentPos).Unit
-                local dot = lastDirection:Dot(toRail)
-
-                if dot > bDot and (rail.Position - currentPos).Magnitude < 50 then
-                    bDot = dot
-                    nextRail = rail
-                end
-            end
-        end
-
-        currentRail = nextRail
-    end
-end)
-
-task.spawn(function()
-    while true do
-        for i = 1000, 1500 do
-            game:GetService("ReplicatedStorage").Shared.Universe.Network.RemoteEvent.Actionable:FireServer(i)
-            task.wait()
-        end
     end
 end)
 
