@@ -17,23 +17,27 @@ local function getEmptyZone()
     return nil
 end
 
-local emptyZone = getEmptyZone()
-if emptyZone then
-    local hitbox = workspace.PartyZones:FindFirstChild(emptyZone) and workspace.PartyZones[emptyZone]:FindFirstChild("Hitbox")
-    if hitbox and hitbox:IsA("BasePart") then
-        local character = game.Players.LocalPlayer.Character
-        if character then
-            local rootPart = character:FindFirstChild("HumanoidRootPart")
-            if rootPart then
-                firetouchinterest(hitbox, rootPart, 0)
-                task.wait(1)
+while true do
+    local emptyZone = getEmptyZone()
+    if emptyZone then
+        local hitbox = workspace.PartyZones:FindFirstChild(emptyZone) and workspace.PartyZones[emptyZone]:FindFirstChild("Hitbox")
+        if hitbox and hitbox:IsA("BasePart") then
+            local character = game.Players.LocalPlayer.Character
+            if character then
+                local rootPart = character:FindFirstChild("HumanoidRootPart")
+                if rootPart then
+                    firetouchinterest(hitbox, rootPart, 0)
+                    task.wait(0.2)
+                end
             end
         end
-    end
 
-    local remote = game:GetService("ReplicatedStorage").Shared.Universe.Network.RemoteEvent.CreateParty
-    local args = { { isPrivate = true, trainId = "default", maxMembers = 1, gameMode = "Normal" } }
-    remote:FireServer(unpack(args))
+        local remote = game:GetService("ReplicatedStorage").Shared.Universe.Network.RemoteEvent.CreateParty
+        local args = { { isPrivate = true, trainId = "default", maxMembers = 1, gameMode = "Normal" } }
+        remote:FireServer(unpack(args))
+        break
+    end
+    task.wait(1)
 end
 
 queue_on_teleport("loadstring(game:HttpGet('https://raw.githubusercontent.com/zerquesth/Other_Scripts/refs/heads/main/gameTest'))()")
