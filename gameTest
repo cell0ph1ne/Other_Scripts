@@ -1,0 +1,92 @@
+-- open source for a test
+
+task.spawn(function()
+    repeat task.wait() until game.Players.LocalPlayer.Character
+    local root = game.Players.LocalPlayer.Character:WaitForChild("HumanoidRootPart")
+
+    local velo = 1500
+    local tRails = {}
+
+    for _, obj in ipairs(workspace:WaitForChild("RailSegments"):GetDescendants()) do
+        if obj:IsA("BasePart") and obj.Name == "Guide" then
+            table.insert(tRails, obj)
+        end
+    end
+
+    function pathway(pos)
+        local closest, dist = nil, math.huge
+        for _, rail in ipairs(tRails) do
+            local d = (rail.Position - pos).Magnitude
+            if d < dist then
+                dist = d
+                closest = rail
+            end
+        end
+        return closest
+    end
+
+    workspace.CurrentCamera.CameraType = Enum.CameraType.Scriptable
+
+    local currentRail = pathway(root.Position)
+    local currentPos = currentRail and currentRail.Position or root.Position
+
+    local tVisited = {}
+    local lastDirection = Vector3.new(0, 0, 1)
+
+    while true do
+        if currentRail then
+            tVisited[currentRail] = true
+            lastDirection = currentRail.CFrame.LookVector.Unit
+        end
+
+        local targetPos = currentPos - lastDirection * 20
+        local distance = (targetPos - currentPos).Magnitude
+        local duration = distance / velo
+        local start = tick()
+
+        while tick() - start < duration do
+            local pos = currentPos:Lerp(targetPos, (tick() - start) / duration)
+
+            root.CFrame = CFrame.new(pos)
+
+            workspace.CurrentCamera.CFrame = CFrame.new(
+                pos + Vector3.new(0, 15, 0),
+                pos
+            )
+
+            game:GetService("RunService").RenderStepped:Wait()
+        end
+
+        currentPos = targetPos
+
+        local nextRail = nil
+        local bDot = .5
+
+        for _, rail in ipairs(tRails) do
+            if not tVisited[rail] then
+                local toRail = (rail.Position - currentPos).Unit
+                local dot = lastDirection:Dot(toRail)
+
+                if dot > bDot and (rail.Position - currentPos).Magnitude < 50 then
+                    bDot = dot
+                    nextRail = rail
+                end
+            end
+        end
+
+        currentRail = nextRail
+    end
+end)
+
+task.spawn(function()
+    while true do
+        for i = 1000, 1500 do
+            game:GetService("ReplicatedStorage").Shared.Universe.Network.RemoteEvent.Actionable:FireServer(i)
+            task.wait()
+        end
+    end
+end)
+
+task.delay(40, function()
+    game.Players.LocalPlayer.Character:BreakJoints()
+end)
