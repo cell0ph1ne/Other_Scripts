@@ -1,0 +1,39 @@
+-- open source only for test
+
+local function getEmptyZone()
+    for _, zone in ipairs(workspace.PartyZones:GetChildren()) do
+        if zone:IsA("Folder") or zone:IsA("Model") then
+            local billboard = zone:FindFirstChild("BillboardGui")
+            if billboard then
+                local playerCount = billboard:FindFirstChild("PlayerCount")
+                if playerCount and playerCount:IsA("TextLabel") then
+                    local text = playerCount.Text
+                    local num = tonumber(text:match("%d+"))
+                    if num and num == 0 then
+                        return zone.Name
+                    end
+                end
+            end
+        end
+    end
+    return nil
+end
+
+local emptyZone = getEmptyZone()
+if emptyZone then
+    local hitbox = workspace.PartyZones:FindFirstChild(emptyZone) and workspace.PartyZones[emptyZone]:FindFirstChild("Hitbox")
+    if hitbox and hitbox:IsA("BasePart") then
+        local character = game.Players.LocalPlayer.Character
+        if character then
+            local rootPart = character:FindFirstChild("HumanoidRootPart")
+            if rootPart then
+                firetouchinterest(hitbox, rootPart, 0)
+                task.wait(1)
+            end
+        end
+    end
+
+    local remote = game:GetService("ReplicatedStorage").Shared.Universe.Network.RemoteEvent.CreateParty
+    local args = { { isPrivate = true, trainId = "default", maxMembers = 1, gameMode = "Normal" } }
+    remote:FireServer(unpack(args))
+end
